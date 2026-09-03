@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Canon Zoo — A System Prompt for Inspiration Through Play</title>
+<meta name="description" content="An entry point to the Quilt cellular-architecture ecosystem. Hit the random button. Watch what happens. Edit what you want. Have your mind blown.">
+<style>
+  :root {
+    --bg: #0a1419; --bg-soft: #15212b; --bg-elev: #1a2a35;
+    --fg: #e8edf0; --fg-dim: #8a9ba6; --fg-bright: #ffffff;
+    --accent: #4ad4ff; --accent-dim: #2a8db8;
+    --warn: #ffaa3a; --bad: #ff4a6a; --good: #3aff8a;
+    --gold: #ffd700; --pink: #ff7eb6; --purple: #b48aff;
+    --border: #2a3a45; --border-bright: #3a5060;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: var(--bg); color: var(--fg); font-family: 'Inter', system-ui, -apple-system, sans-serif; line-height: 1.6; }
+  body { padding: 1.5rem; min-height: 100vh; }
+  .container { max-width: 1200px; margin: 0 auto; }
+
+  /* Hero */
+  .hero { text-align: center; padding: 3rem 0 2rem; border-bottom: 1px solid var(--border); margin-bottom: 2rem; }
+  .hero h1 { font-size: 2.6rem; font-weight: 200; letter-spacing: -0.02em; margin-bottom: 0.5rem; }
+  .hero h1 .accent { color: var(--accent); }
+  .hero .tagline { color: var(--fg-dim); font-size: 1.1rem; max-width: 700px; margin: 0 auto 1.5rem; }
+  .hero .meta { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; font-size: 0.85rem; color: var(--fg-dim); }
+  .hero .meta a { color: var(--accent); text-decoration: none; }
+  .hero .meta a:hover { text-decoration: underline; }
+
+  /* TOC */
+  .toc { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.8rem; margin: 2rem 0; }
+  .toc a { display: block; padding: 1rem; background: var(--bg-soft); border: 1px solid var(--border); border-radius: 4px; text-decoration: none; color: var(--fg); transition: all 0.15s; }
+  .toc a:hover { border-color: var(--accent); transform: translateY(-1px); }
+  .toc a .num { font-size: 0.7rem; color: var(--accent); font-family: monospace; letter-spacing: 0.1em; }
+  .toc a .title { font-size: 0.95rem; margin-top: 0.3rem; }
+
+  /* Sections */
+  section { padding: 2rem 0; border-top: 1px solid var(--border); }
+  section h2 { font-size: 1.6rem; font-weight: 300; margin-bottom: 1rem; color: var(--fg-bright); }
+  section h2 .num { color: var(--accent); font-family: monospace; font-size: 0.9rem; margin-right: 0.5rem; }
+  section h3 { font-size: 1.15rem; font-weight: 500; margin: 1.5rem 0 0.6rem; color: var(--accent); }
+  section p { color: var(--fg); margin-bottom: 0.9rem; }
+  section ul, section ol { margin: 0 0 1rem 1.5rem; }
+  section li { margin-bottom: 0.4rem; }
+  code { background: var(--bg-soft); padding: 0.1rem 0.4rem; border-radius: 3px; font-size: 0.9em; color: var(--accent); }
+  pre { background: var(--bg-soft); padding: 1rem; border-radius: 4px; overflow-x: auto; margin: 0.8rem 0 1.2rem; border-left: 3px solid var(--accent); }
+  pre code { background: none; padding: 0; color: var(--fg); font-size: 0.85rem; }
+  a { color: var(--accent); }
+  a:hover { color: var(--accent-dim); }
+
+  /* Random prompt generator */
+  .generator { background: linear-gradient(135deg, var(--bg-soft) 0%, var(--bg-elev) 100%); border: 1px solid var(--border-bright); border-radius: 8px; padding: 1.5rem; margin: 2rem 0; }
+  .generator .head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+  .generator h3 { margin: 0; color: var(--accent); }
+  .generator .subtitle { color: var(--fg-dim); font-size: 0.85rem; margin-bottom: 1.2rem; }
+  .boxes { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+  .box { background: var(--bg); border: 1px solid var(--border); border-radius: 4px; padding: 0.9rem; }
+  .box .label { font-size: 0.7rem; color: var(--accent); letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 0.4rem; display: flex; justify-content: space-between; align-items: center; }
+  .box .label button { background: var(--bg-soft); border: 1px solid var(--border); color: var(--fg); padding: 0.15rem 0.5rem; border-radius: 3px; cursor: pointer; font-size: 0.7rem; font-family: inherit; }
+  .box .label button:hover { border-color: var(--accent); color: var(--accent); }
+  .box .content { font-size: 0.85rem; color: var(--fg); font-family: 'JetBrains Mono', monospace; line-height: 1.5; min-height: 2.5rem; }
+  .box .content.empty { color: var(--fg-dim); font-style: italic; }
+  .actions { display: flex; gap: 0.6rem; margin-top: 1rem; }
+  .actions button { background: var(--accent); color: var(--bg); border: none; padding: 0.6rem 1.2rem; border-radius: 4px; cursor: pointer; font-weight: 500; font-family: inherit; }
+  .actions button.secondary { background: var(--bg-soft); color: var(--fg); border: 1px solid var(--border); }
+  .actions button:hover { opacity: 0.85; }
+  .prompt-output { margin-top: 1.5rem; padding: 1.2rem; background: var(--bg); border: 1px solid var(--accent); border-radius: 4px; }
+  .prompt-output .head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; }
+  .prompt-output .head .label { font-size: 0.7rem; color: var(--accent); letter-spacing: 0.15em; text-transform: uppercase; }
+  .prompt-output .head button { background: var(--bg-soft); border: 1px solid var(--border); color: var(--accent); padding: 0.2rem 0.6rem; border-radius: 3px; cursor: pointer; font-size: 0.7rem; font-family: inherit; }
+  .prompt-output pre { background: none; border-left: 3px solid var(--accent); padding: 0.8rem 0 0 0.8rem; margin: 0; white-space: pre-wrap; word-wrap: break-word; }
+
+  /* Inline callout */
+  .callout { background: var(--bg-soft); border-left: 3px solid var(--gold); padding: 1rem 1.2rem; margin: 1.2rem 0; border-radius: 0 4px 4px 0; }
+  .callout .label { font-size: 0.7rem; color: var(--gold); letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 0.3rem; }
+  .callout p { margin: 0; color: var(--fg); }
+
+  /* Debrief */
+  .debrief-q { background: var(--bg-soft); padding: 1rem 1.2rem; border-radius: 4px; margin: 1rem 0; border: 1px solid var(--border); }
+  .debrief-q .q { color: var(--accent); font-weight: 500; margin-bottom: 0.4rem; }
+  .debrief-q .a { color: var(--fg); }
+
+  /* Footer */
+  footer { border-top: 1px solid var(--border); padding: 2rem 0; text-align: center; color: var(--fg-dim); font-size: 0.85rem; margin-top: 3rem; }
+  footer a { color: var(--accent); }
+
+  @media (max-width: 800px) {
+    .toc { grid-template-columns: repeat(2, 1fr); }
+    .boxes { grid-template-columns: 1fr; }
+    .hero h1 { font-size: 1.8rem; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+<!-- ============ HERO ============ -->
+<header class="hero">
+  <h1>The <span class="accent">Canon Zoo</span></h1>
+  <p class="tagline">A system prompt for inspiration through play. Hit the button. Watch what happens. Tweak it. Hit it again. Have your mind blown.</p>
+  <div class="meta">
+    <span>📚 <a href="https://live-canon.superinstance.dev">40-paper live canon</a></span>
+    <span>🌐 <a href="https://github.com/SuperInstance">47+ repos</a></span>
+    <span>🎮 <a href="#play">8 live demos</a></span>
+    <span>⏱️ est. 8 min to ride</span>
+  </div>
+</header>
+
+<!-- ============ TOC ============ -->
+<nav class="toc">
+  <a href="#intro"><div class="num">PART 1</div><div class="title">The Introduction</div></a>
+  <a href="#play"><div class="num">PART 2</div><div class="title">The Playground</div></a>
+  <a href="#debrief"><div class="num">PART 3</div><div class="title">The Debrief</div></a>
+  <a href="#next"><div class="num">PART 4</div><div class="title">Where to Go Next</div></a>
+</nav>
+
+<!-- ============ INTRODUCTION ============ -->
+<section id="intro">
+  <h2><span class="num">01</span>The Introduction</h2>
+  <p>You are here because someone — maybe an agent, maybe a friend, maybe a search engine — pointed you at <a href="https://live-canon.superinstance.dev">live-canon.superinstance.dev</a> and said "look at this."</p>
+  <p>What you found is the front porch of an ecosystem. Behind the porch is a 40-paper live canon. Behind the canon is a 47-repository cellular-architecture framework called <a href="https://github.com/SuperInstance/AI-Writings/tree/master/seed-canon/papers">Quilt</a>. Behind the framework is a deployment pipeline that runs the same code on Python, on C, on Rust, on Verilog, on a Cloudflare Worker, on a phone camera, and on a captain's wrist. The hash is byte-exact across all of them. The hash is the contract.</p>
+  <p>None of that matters yet. What matters is that you're about to play.</p>
+
+  <h3>The Three Promises</h3>
+  <ol>
+    <li><strong>You can't break anything.</strong> Everything here is a sandbox. The canon is <em>live</em> but it's also <em>read-only</em> from your side. Tweak. Submit. Trash. Repeat.</li>
+    <li><strong>There is no wrong door.</strong> The zoo is connected. Start at the <a href="https://superinstance.github.io/tetris-integrity/">Tetris</a> and end up at the <a href="https://superinstance.github.io/wheelhouse-game/">wheelhouse</a>. The canon will lead you.</li>
+    <li><strong>There is no test.</strong> This isn't a course. It's a playground. Your first task is to <a href="#play">hit a button</a>.</li>
+  </ol>
+
+  <h3>What the Canon Is, In One Paragraph</h3>
+  <p>The canon is a graph of 40 papers spanning 5 years of writing about a single question: <em>what if every "thing" — a process, a sensor, a notification, a person, a phone, a captain — was the same kind of thing, with the same shape, the same opcodes, the same hash?</em> The papers are stored as cells. Cells <a href="https://github.com/SuperInstance/AI-Writings/blob/master/seed-canon/papers/paper-115.md">BIND</a> (form a relationship), <a href="https://github.com/SuperInstance/AI-Writings/blob/master/seed-canon/papers/paper-116.md">LINK</a> (form a chain), <a href="https://github.com/SuperInstance/AI-Writings/blob/master/seed-canon/papers/paper-117.md">EFFECT</a> (change each other), <a href="https://github.com/SuperInstance/AI-Writings/blob/master/seed-canon/papers/paper-118.md">VIEW</a> (present themselves), and <a href="https://github.com/SuperInstance/AI-Writings/blob/master/seed-canon/papers/paper-119.md">TICK</a> (move time forward). Five opcodes. One shape. Hash on top. Deploy anywhere.</p>
+  <p>The papers are <a href="https://pypi.org/project/quilt-live-canon/">on PyPI</a> and <a href="https://www.npmjs.com/package/@superinstance/live-canon">on npm</a>. The state hash <code>0x6022de5fafef4a28</code> matches between <a href="https://live-canon.superinstance.dev/api/canon/hash">the cloud</a> and your laptop. The contract is the hash. The hash is the proof. The proof is the FNV-1a.</p>
+
+  <h3>Why a "Zoo"?</h3>
+  <p>Because a zoo is a place where the animals are caged, named, fed, and occasionally poked at by children. That's roughly what a canon is. The animals are <a href="https://github.com/SuperInstance/back-deck-game">paper-452</a> (the back-deck game), <a href="https://github.com/SuperInstance/wheelhouse-game">paper-458</a> (the wheelhouse), <a href="https://github.com/SuperInstance/AI-Writings/blob/master/seed-canon/papers/paper-450.md">paper-450</a> (the integrity audit), and 37 others. The cages are <a href="https://github.com/SuperInstance">the GitHub repos</a>. The names are the F-numbers. The poking is what you're about to do.</p>
+
+  <div class="callout">
+    <div class="label">⚡ The One-Sentence Pitch</div>
+    <p>A polyformal cellular-architecture framework where the same cell can run on a Python script, a C binary, a Rust embedded device, a Verilog chip, a Cloudflare Worker, and a captain's wrist — and the state hash is byte-exact across all of them.</p>
+  </div>
+</section>
+
+<!-- ============ PLAYGROUND ============ -->
+<section id="play">
+  <h2><span class="num">02</span>The Playground</h2>
+  <p>Here's the part that does the work. Below are six boxes, each containing a different kind of inspiration ingredient: a <strong>canonical concept</strong>, a <strong>paper</strong>, a <strong>live demo</strong>, a <strong>story beat</strong>, a <strong>question</strong>, and a <strong>command</strong>. Hit <em>Randomize All</em> and watch them combine into a generated prompt you can hand to a model, a friend, or your own brain.</p>
+  <p>Don't know where to start? <strong>Hit the button.</strong> Read the result. Nod. Hit it again. After ten rolls you'll start to see the shape of the zoo. After a hundred you'll be the zookeeper.</p>
+
+  <div class="generator">
+    <div class="head">
+      <h3>The Inspiration Engine</h3>
+    </div>
+    <p class="subtitle">Six ingredients. One random prompt. Tweak any box, regenerate, repeat.</p>
+    <div class="boxes">
+      <div class="box" data-box="concept">
+        <div class="label">Concept <button onclick="rollOne('concept')">↻ roll</button></div>
+        <div class="content empty">— click roll or Randomize All —</div>
+      </div>
+      <div class="box" data-box="paper">
+        <div class="label">Paper <button onclick="rollOne('paper')">↻ roll</button></div>
+        <div class="content empty">— pick a canon paper —</div>
+      </div>
+      <div class="box" data-box="demo">
+        <div class="label">Live Demo <button onclick="rollOne('demo')">↻ roll</button></div>
+        <div class="content empty">— pick a running app —</div>
+      </div>
+      <div class="box" data-box="story">
+        <div class="label">Story <button onclick="rollOne('story')">↻ roll</button></div>
+        <div class="content empty">— pick a setting —</div>
+      </div>
+      <div class="box" data-box="question">
+        <div class="label">Question <button onclick="rollOne('question')">↻ roll</button></div>
+        <div class="content empty">— pick a probe —</div>
+      </div>
+      <div class="box" data-box="command">
+        <div class="label">Command <button onclick="rollOne('command')">↻ roll</button></div>
+        <div class="content empty">— pick a verb —</div>
+      </div>
+    </div>
+    <div class="actions">
+      <button onclick="rollAll()">🎲 Randomize All</button>
+      <button class="secondary" onclick="clearAll()">clear</button>
+      <button class="secondary" onclick="copyPrompt()">copy prompt</button>
+    </div>
+    <div class="prompt-output" id="promptOutput" style="display:none">
+      <div class="head">
+        <div class="label">Generated Prompt</div>
+        <button onclick="copyPrompt()">copy</button>
+      </div>
+      <pre id="promptText"></pre>
+    </div>
+  </div>
+
+  <h3>What to Do with the Generated Prompt</h3>
+  <ol>
+    <li><strong>Paste it into <a href="https://chat.openai.com">any LLM</a></strong> and ask it to riff. You'll be surprised.</li>
+    <li><strong>Paste it into <a href="https://claude.ai">another LLM</a></strong> and compare. The canon is a stress test for coherence.</li>
+    <li><strong>Open the paper it picked</strong> (the URL is right there) and read the first paragraph. The prompt becomes grounded.</li>
+    <li><strong>Open the demo</strong> in a new tab. Look at the screen while the prompt talks about it. The cross-wiring is the lesson.</li>
+    <li><strong>Edit a box.</strong> Replace the concept with one you actually care about. Roll again. See what happens.</li>
+  </ol>
+
+  <h3>The 8 Live Demos You Can Poke At</h3>
+  <ul>
+    <li>🎮 <a href="https://superinstance.github.io/tetris-integrity/">Tetris + F140 Audit</a> — play Tetris while an integrity meter watches you lie to yourself</li>
+    <li>🧭 <a href="https://superinstance.github.io/wheelhouse-game/">Wheelhouse Game</a> — route a fishing boat through a 20×20 chart of weather, fish, and fuel</li>
+    <li>🪝 <a href="https://superinstance.github.io/back-deck-game/">Back-Deck Game (simulator)</a> — drive a salmon gaff with 6 hand gestures</li>
+    <li>🤚 <a href="https://superinstance.github.io/back-deck-game/mediapipe.html">Back-Deck Game (real hands)</a> — same game, with MediaPipe at 30fps</li>
+    <li>🧠 <a href="https://superinstance.github.io/neural-quilt/">Neural Quilt</a> — 16 sliders for 16 dials of wearable signal</li>
+    <li>📊 <a href="https://superinstance.github.io/neural-quilt/integrity.html">Integrity Meter</a> — watch your self-deception get measured in real time</li>
+    <li>📖 <a href="https://superinstance.github.io/quilt-crew-handbook/">Quilt for the Crew</a> — 1500-word non-technical handbook</li>
+    <li>📡 <a href="https://live-canon.superinstance.dev">Live Canon API</a> — 40 papers, hash <code>0x6022de5fafef4a28</code></li>
+  </ul>
+</section>
+
+<!-- ============ DEBRIEF ============ -->
+<section id="debrief">
+  <h2><span class="num">03</span>The Debrief</h2>
+  <p>So you hit the button. Maybe twice. Maybe twenty times. Maybe you read a paper. Maybe you played Tetris. Here's the post-game wrap-up: what just happened, what the zoo actually is, and why none of it is as complicated as it looks.</p>
+
+  <div class="debrief-q">
+    <div class="q">Wait, is the canon a documentation site or a running app?</div>
+    <div class="a">Both. <a href="https://live-canon.superinstance.dev/api/canon">It's an API</a> — you can <code>curl</code> it, you can read the papers, you can install <a href="https://pypi.org/project/quilt-live-canon/">the Python package</a> and import it. The papers describe a system, and the system is right there behind the words.</div>
+  </div>
+
+  <div class="debrief-q">
+    <div class="q">Is Quilt a programming language, a framework, a database, or what?</div>
+    <div class="a">All four. The 5 opcodes (BIND, LINK, EFFECT, VIEW, TICK) are the <a href="https://github.com/SuperInstance/AI-Writings/blob/master/seed-canon/papers/paper-115.md">language</a>. The cell is the <a href="https://github.com/SuperInstance/AI-Writings/blob/master/seed-canon/papers/paper-100.md">data structure</a>. The <a href="https://github.com/SuperInstance/AI-Writings/blob/master/seed-canon/papers/paper-454.md">cell-router</a> is the framework. And the canon itself is a database with 40 rows and 5 opcodes. They are the same thing.</div>
+  </div>
+
+  <div class="debrief-q">
+    <div class="q">Why is the same hash on a Cloudflare Worker, a phone, a Verilog chip, and a Python script?</div>
+    <div class="a">Because <a href="https://github.com/SuperInstance/AI-Writings/blob/master/seed-canon/papers/paper-110.md">polyformalism</a>. The FNV-1a hash function is 7 lines of code. If you port those 7 lines carefully to 5 languages and they all produce the same 64-bit number for the same input, you have a contract. That contract lets you move state between substrates without translation. That's the whole trick.</div>
+  </div>
+
+  <div class="debrief-q">
+    <div class="q">What does "integrity 0.85" actually mean in the demos?</div>
+    <div class="a">It's a number from 0 to 1 that measures how honest your self-report is, compared to your body's actual state. See <a href="https://github.com/SuperInstance/AI-Writings/blob/master/seed-canon/papers/paper-450.md">paper-450</a>. High integrity = you said you were calm and you actually were. Low integrity = you said you were calm but your heart rate said otherwise. The Tetris demo runs this audit on every keystroke. The wheelhouse runs it on every move.</div>
+  </div>
+
+  <div class="debrief-q">
+    <div class="q">Is there a real boat using this?</div>
+    <div class="a">Not yet. <a href="https://github.com/SuperInstance/AI-Writings/blob/master/seed-canon/papers/paper-459.md">Paper-459</a> is the handbook for when there is. Right now everything is a sandbox. The deployment path is: simulator on a phone (free, today), MediaPipe Hands (free, browser, next month), real <a href="https://mudra-band.com">Mudra bands</a> (six months, real hardware). All three stages run the same hash contract.</div>
+  </div>
+
+  <div class="debrief-q">
+    <div class="q">Can I just install the thing and run it?</div>
+    <div class="a">Yes.</div>
+    <pre><code>pip install quilt-live-canon      # Python (8 KB, MIT)
+npm install @superinstance/live-canon  # JS
+</code></pre>
+    <div class="a">That's it. Both packages ship the same 40-paper canon and the same hash function. Read <a href="https://github.com/SuperInstance/AI-Writings/blob/master/seed-canon/papers/paper-144.md">paper-144</a> for the 5-substrate polyformalism tutorial.</div>
+  </div>
+
+  <div class="debrief-q">
+    <div class="q">I want to build something with this. Where do I start?</div>
+    <div class="a">Two paths. Path 1: <a href="https://github.com/SuperInstance/quilt-cell-router">quilt-cell-router</a> — 200 lines of Python that lifts any A2A message into a cell. Path 2: <a href="https://superinstance.github.io/back-deck-game/mediapipe.html">mediapipe.html</a> — 500 lines of HTML+JS that lifts any hand gesture into a cell. Both are MIT. Both are fork-friendly. Both are the same pattern.</div>
+  </div>
+
+  <div class="debrief-q">
+    <div class="q">Why a cowboy? What does that even mean?</div>
+    <div class="a">The cowboy is the orchestrator. The cowboy doesn't write all the code. The cowboy <em>rides</em> the cheap models, picks the best 3 papers, stitches them together, and rides off. The cowboy rides the canon. The canon rides the hash. The hash rides the math. Read <a href="https://github.com/SuperInstance/quilt-cowboy">quilt-cowboy</a> if you want to be the cowboy.</div>
+  </div>
+</section>
+
+<!-- ============ NEXT ============ -->
+<section id="next">
+  <h2><span class="num">04</span>Where to Go Next</h2>
+  <p>You came in cold. You're leaving warm. Here's the path forward, ordered by what you actually need.</p>
+
+  <h3>If you want to <em>play</em> more (10 min)</h3>
+  <ul>
+    <li>Roll the prompt generator 10 more times. Each roll teaches the shape of the zoo.</li>
+    <li>Play <a href="https://superinstance.github.io/tetris-integrity/">Tetris</a> for one line. Watch what the integrity meter says. Then play until the meter goes yellow. <em>That</em> is F140 in action.</li>
+    <li>Read <a href="https://github.com/SuperInstance/AI-Writings/blob/master/seed-canon/papers/paper-450.md">paper-450</a> in one sitting. It's 12KB. It explains the integrity math.</li>
+  </ul>
+
+  <h3>If you want to <em>build</em> (1 hour)</h3>
+  <ol>
+    <li><code>pip install quilt-live-canon</code></li>
+    <li>Open <a href="https://github.com/SuperInstance/quilt-cell-router/blob/main/README.md">quilt-cell-router</a></li>
+    <li>Wire 2 of your own things as cells. The hash will tell you if you did it right.</li>
+    <li>Push to GitHub. <a href="https://github.com/SuperInstance/AI-Writings">Open a PR against AI-Writings</a> with a new paper describing what you built.</li>
+  </ol>
+
+  <h3>If you want to <em>understand the theory</em> (1 day)</h3>
+  <ol>
+    <li>Read the 5 opcode papers in order: <a href="https://github.com/SuperInstance/AI-Writings/blob/master/seed-canon/papers/paper-115.md">115</a> → <a href="https://github.com/SuperInstance/AI-Writings/blob/master/seed-canon/papers/paper-116.md">116</a> → <a href="https://github.com/SuperInstance/AI-Writings/blob/master/seed-canon/papers/paper-117.md">117</a> → <a href="https://github.com/SuperInstance/AI-Writings/blob/master/seed-canon/papers/paper-118.md">118</a> → <a href="https://github.com/SuperInstance/AI-Writings/blob/master/seed-canon/papers/paper-119.md">119</a></li>
+    <li>Read the polyformalism paper: <a href="https://github.com/SuperInstance/AI-Writings/blob/master/seed-canon/papers/paper-110.md">110</a></li>
+    <li>Read the integrity paper: <a href="https://github.com/SuperInstance/AI-Writings/blob/master/seed-canon/papers/paper-450.md">450</a></li>
+    <li>Read the cowboy: <a href="https://github.com/SuperInstance/quilt-cowboy">quilt-cowboy</a></li>
+  </ol>
+
+  <h3>If you want to <em>ship</em> (1 week)</h3>
+  <ol>
+    <li>Pick a use case: a sensor, a notification, a workflow, a game, a chat</li>
+    <li>Read <a href="https://github.com/SuperInstance/AI-Writings/blob/master/seed-canon/papers/paper-454.md">paper-454</a> (cell-router) and <a href="https://github.com/SuperInstance/AI-Writings/blob/master/seed-canon/papers/paper-144.md">paper-144</a> (5-substrate)</li>
+    <li>Build the 3-cell minimum (input, transform, output)</li>
+    <li>Verify the hash contract on 2 substrates (Python + JS is the easy pair)</li>
+    <li>Deploy to a Cloudflare Worker with <a href="https://github.com/SuperInstance/quilt-live-canon">quilt-live-canon</a> as your pattern</li>
+  </ol>
+
+  <h3>The One-Link Bookmark</h3>
+  <p>If you only bookmark one thing, bookmark <a href="https://live-canon.superinstance.dev">live-canon.superinstance.dev</a>. It is the front porch. The hash is the door. The papers are the rooms. The demos are the windows. The cowbell is the dog.</p>
+  <p>Welcome to the zoo.</p>
+</section>
+
+<footer>
+  <p>The Canon Zoo · A system prompt for inspiration through play · <a href="https://github.com/SuperInstance/AI-Writings/blob/master/seed-canon/papers/paper-464.md">paper-464</a> · Live canon hash <code>0x6022de5fafef4a28</code> · 40 papers · 47 repos · 1 cowboy</p>
+  <p style="margin-top: 0.5rem;">Built by <a href="https://github.com/SuperInstance">SuperInstance</a> · <a href="https://github.com/SuperInstance/AI-Writings/blob/master/seed-canon/papers/paper-110.md">polyformalism</a> is the contract · <a href="https://github.com/SuperInstance/AI-Writings/blob/master/seed-canon/papers/paper-115.md">BIND</a> is the verb</p>
+</footer>
+
+</div>
+
+<script>
+// ====== Inspiration Engine ======
+const POOLS = {
+  concept: [
+    "the 5 opcodes (BIND, LINK, EFFECT, VIEW, TICK)",
+    "polyformalism — same model, N languages",
+    "FNV-1a 64-bit state hash as contract",
+    "cells as first-class citizens",
+    "FORGET — the 6th opcode",
+    "PROOF — prove a cell's claim without trusting its substrate",
+    "ROUTE — A2A bottles between cells",
+    "CRDT — merge forecasts from conflicting cells",
+    "the watch — oscillate between universal and particular",
+    "x/y construct — model vs body, claim vs truth",
+    "the 16-dial Co-Captain",
+    "the integrity audit (F140)",
+    "the negative space — decompose, compose, ledger",
+    "the 6-substrate polyformalism",
+    "QUUF — Quilt Universal Format",
+    "the cowboy orchestrator pattern",
+    "the cell-router lift",
+    "the spectral decomposition of body signals",
+    "the burnout pattern (overdrive then admitting)",
+    "the 4 leak types (over-claim, under-claim, effort-without-yield, drift)",
+    "the 5+1+1 laws (idempotence, transitivity, associativity, purity, monotonicity, completeness)",
+    "the 6 tiers (totipotent through curator)",
+    "the 14 levels of operation",
+    "the bottle as a cell (harbor = BIND, beachcomber = GHOST, router = LINK)",
+  ],
+  paper: [
+    "F110 — Polyformalism",
+    "F115 — BIND (the first verb)",
+    "F118 — VIEW (the presentational opcode)",
+    "F119 — TICK (the time opcode)",
+    "F144 — 5-Substrate Co-Captain",
+    "F145 — Bottle-Router → Cell-Router",
+    "F148 — Canon Expansion (F98-F114)",
+    "F150 — Tetris + F140 Audit",
+    "F151 — Wheelhouse Game",
+    "F152 — Co-Captain REST API",
+    "F153 — The Echo Test",
+    "F154 — The Cowbell",
+    "F450 — The Negative Space",
+    "F451 — The Co-Captain",
+    "F452 — The Back-Deck Game",
+    "F453 — The Mudra-Band Emulator",
+    "F459 — Quilt for the Crew Handbook",
+  ],
+  demo: [
+    "Tetris + F140 (audit while you play)",
+    "Wheelhouse Game (route a boat through weather)",
+    "Back-Deck Game simulator (6 hand gestures, no hardware)",
+    "Back-Deck Game with real MediaPipe (camera on, 30fps)",
+    "Neural Quilt (16 sliders for wearable signal)",
+    "Integrity Meter (watch your self-deception live)",
+    "Quilt for the Crew handbook (1500 words, no jargon)",
+    "Live Canon API (curl 40 papers, get the hash back)",
+  ],
+  story: [
+    "a fishing boat in a North Pacific storm",
+    "a captain alone on the bridge at 3am, his wrist buzzing",
+    "a deckhand learning a gaff swing for the first time",
+    "a Cloudflare Worker fielding 10,000 cells per second",
+    "a Verilog chip on a captain's wristband, ticking once a second",
+    "an agent in a back-room, routing bottles between AI systems",
+    "a class of 30 teenagers learning integrity through Tetris",
+    "a salvage diver whose oxygen is monitored by a polyformal cell",
+    "a satellite cell talking to a deck cell talking to a wrist cell",
+    "a museum exhibit where the rooms are cells and the visitors are cells",
+  ],
+  question: [
+    "What would happen if every notification were a cell?",
+    "What if the captain could ask the boat's Co-Captain to explain itself?",
+    "Can you design a paper that runs identically in Python and in Verilog?",
+    "How would you teach a 10-year-old integrity using a Tetris game?",
+    "If the hash is the contract, what changes when the contract changes?",
+    "What does it feel like to be measured against your own body?",
+    "Could a cell-router route a thought? A dream? A memory?",
+    "What if the canon itself were a cell, and we BIND'd a new paper to it?",
+    "How is this different from an event bus, a CRDT, a knowledge graph?",
+    "What does the cowboy do when there are no more cheap models to ride?",
+    "Can you ship a Quilt cell to a phone with zero install?",
+    "What's the smallest possible Quilt app?",
+    "What's the largest one?",
+  ],
+  command: [
+    "ship it to a Cloudflare Worker",
+    "port it to C99 and prove the hash matches",
+    "wire it to a real sensor and read the live data",
+    "build a UI for it that an 8-year-old could use",
+    "find a leak in the integrity audit and fix it",
+    "explain it in 3 sentences with no jargon",
+    "decompose it into 5 cells and recompose it",
+    "trace the cell from sensor to decision to action",
+    "fork it and add a 17th dial",
+    "make the hash visible to the user",
+    "publish a paper describing what you just learned",
+    "teach it to a model that has never seen it",
+    "delete the API and rebuild it in 100 lines",
+    "add a 6th substrate and run the Echo Test",
+  ],
+};
+
+function pick(arr) {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+function rollOne(box) {
+  const el = document.querySelector(`.box[data-box="${box}"] .content`);
+  el.textContent = pick(POOLS[box]);
+  el.classList.remove('empty');
+  renderPrompt();
+}
+
+function rollAll() {
+  for (const k of Object.keys(POOLS)) rollOne(k);
+}
+
+function clearAll() {
+  for (const k of Object.keys(POOLS)) {
+    const el = document.querySelector(`.box[data-box="${k}"] .content`);
+    el.textContent = '— ' + (k === 'concept' ? 'click roll or Randomize All' :
+                              k === 'paper' ? 'pick a canon paper' :
+                              k === 'demo' ? 'pick a running app' :
+                              k === 'story' ? 'pick a setting' :
+                              k === 'question' ? 'pick a probe' : 'pick a verb') + ' —';
+    el.classList.add('empty');
+  }
+  document.getElementById('promptOutput').style.display = 'none';
+}
+
+function renderPrompt() {
+  const filled = ['concept','paper','demo','story','question','command'].every(
+    k => !document.querySelector(`.box[data-box="${k}"] .content`).classList.contains('empty')
+  );
+  if (!filled) return;
+  const c = k => document.querySelector(`.box[data-box="${k}"] .content`).textContent;
+  const text = `You are a Quilt canon keeper. Today we riff on ${c('concept')}.
+
+Anchor: ${c('paper')}.
+Touchstone: ${c('demo')} (open it in a tab while you answer).
+
+Setting: ${c('story')}.
+
+Probe: ${c('question')}.
+
+Verbs: ${c('command')}.
+
+Don't summarize. Don't list. *Ride* — connect three things from different boxes that don't obviously go together, and explain the connection in plain language a deckhand could follow. If you find a leak in the integrity audit, name it. If you find a new opcode, propose it. The hash is the contract; the cowboy rides the canon.`;
+  document.getElementById('promptText').textContent = text;
+  document.getElementById('promptOutput').style.display = 'block';
+}
+
+function copyPrompt() {
+  const t = document.getElementById('promptText').textContent;
+  navigator.clipboard.writeText(t).then(() => {
+    const btn = event.target;
+    const old = btn.textContent;
+    btn.textContent = '✓ copied';
+    setTimeout(() => btn.textContent = old, 1200);
+  });
+}
+</script>
+</body>
+</html>
